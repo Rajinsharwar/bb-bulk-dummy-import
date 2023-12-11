@@ -2,8 +2,9 @@
 /*
 Plugin Name: BB Massive Dummy Importer
 Description: WordPress plugin for generating a huge amount of dummy data for BuddyBoss.
-Version: 1.0
+Version: 1.2
 Author: Rajin Sharwar
+Author URI: https://linkedin.com/in/rajinsharwar
 */
 
 // Add a menu item under the Tools menu
@@ -24,6 +25,7 @@ function bb_massive_dummy_page() {
     ?>
     <div class="wrap">
         <h1>BB Massive Dummy Importer</h1>
+        <p> <b>If you notice any fatal issue for having timed out(which you will be having in most cases), just try to run the tool again. If you tried to add 3000 items in one go, and it timed out, most probably around 1500 has been aded before hitting the time out. So, just try running again to complete the remaining. </b></p>
         <form method="post" action="">
             <?php wp_nonce_field('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce'); ?>
             <h3>Generate Dummy Users</h3>
@@ -126,6 +128,77 @@ function bb_massive_dummy_page() {
                 <input type="submit" class="button button-primary" name="generate_replies" value="Generate BuddyBoss Replies">
             </p>
             <hr size="3" width="100%" color="ash">
+            <h3>Generate Dummy LearnDash Courses</h3>
+            <p>
+                <label for="num_courses">Number of LearnDash Courses:</label>
+                <input type="number" id="num_courses" name="num_courses" min="1" value="5">
+            </p>
+            <p>
+                <input type="submit" class="button button-primary" name="generate_courses" value="Generate LearnDash Courses">
+            </p>
+            <hr size="3" width="100%" color="ash">
+            <h3>Generate and assign Dummy LearnDash lessons to course</h3>
+            <p>
+                <label for="course_id_lessons">LearnDash Course ID for Lessons:</label>
+                <input type="number" id="course_id_lessons" name="course_id_lessons" min="1" value="1">
+            </p>
+            <p>
+                <label for="num_lessons">Number of LearnDash Lessons:</label>
+                <input type="number" id="num_lessons" name="num_lessons" min="1" value="5">
+            </p>
+            <p>
+                <input type="submit" class="button button-primary" name="generate_lessons" value="Generate LearnDash Lessons">
+            </p>
+            <hr size="3" width="100%" color="ash">
+            <h3>Generate and assign Dummy LearnDash topics to course/lesson</h3>
+            <p>
+                <label for="course_id_topics">LearnDash Course ID for Topics:</label>
+                <input type="number" id="course_id_topics" name="course_id_topics" min="1" value="1">
+            </p>
+            <p>
+                <label for="lesson_id_topics">LearnDash Lesson ID for Topics:</label>
+                <input type="number" id="lesson_id_topics" name="lesson_id_topics" min="1" value="1">
+            </p>
+            <p>
+                <label for="num_topics">Number of LearnDash Topics:</label>
+                <input type="number" id="num_topics" name="num_topics" min="1" value="5">
+            </p>
+            <em> If you want to assign the topics to a certain lesson, keep the "Course" field empty. If you want to assign to a certain course, keep the "Lesson" field empty. If you want to assign it to a certain lesson from a certain course, enter both Course and Lesson ID.
+            <p>
+                <input type="submit" class="button button-primary" name="generate_topics" value="Generate LearnDash Topics">
+            </p>
+            <hr size="3" width="100%" color="ash">
+            <h3>Generate and assign Dummy LearnDash Quizes to lessons.</h3>
+            <p>
+                <label for="course_id_quizzes">LearnDash Course ID for Quizzes:</label>
+                <input type="number" id="course_id_quizzes" name="course_id_quizzes" min="1" value="1">
+            </p>
+            <p>
+                <label for="lesson_id_quizzes">LearnDash Lesson ID for Quizzes:</label>
+                <input type="number" id="lesson_id_quizzes" name="lesson_id_quizzes" min="1" value="1">
+            </p>
+            <p>
+                <label for="num_quizzes">Number of LearnDash Quizzes:</label>
+                <input type="number" id="num_quizzes" name="num_quizzes" min="1" value="5">
+            </p>
+            <p>
+                <input type="submit" class="button button-primary" name="generate_quizzes" value="Generate LearnDash Quizzes">
+            </p>
+            <hr size="3" width="100%" color="ash">
+            <h3>Bulk assign users to a LearnDash Course.</h3>
+            <p>
+                <label for="course_id_enrollment">LearnDash Course ID for Enrollment:</label>
+                <input type="number" id="course_id_enrollment" name="course_id_enrollment" min="1" value="1">
+            </p>
+            <p>
+                <label for="num_members">Number of LearnDash Members to Enroll:</label>
+                <input type="number" id="num_members" name="num_members" min="1" value="5">
+            </p>
+            <p>
+                <input type="submit" class="button button-primary" name="enroll_members" value="Enroll LearnDash Members">
+            </p>
+            <em>Make sure you have equal or more than the users you want to enroll in the course.</em>
+            <hr size="3" width="100%" color="ash">
             <h3>Make all users Active</h3>
             <p>
                 <input type="submit" class="button button-primary" name="make_all_users_active" value="Make All Users Active">
@@ -202,6 +275,52 @@ function bb_massive_dummy_page() {
             // Generate specified number of BuddyBoss replies for the specified discussion
             generate_buddyboss_replies($forum_id, $discussion_id, $num_replies);
             admin_notice_success($num_replies . ' BuddyBoss replies generated successfully for Discussion ID ' . $discussion_id);
+        }
+
+        if (isset($_POST['generate_courses']) && check_admin_referer('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce')) {
+            $num_courses = isset($_POST['num_courses']) ? intval($_POST['num_courses']) : 5;
+
+            // Generate specified number of dummy LearnDash courses
+            generate_dummy_learndash_courses($num_courses);
+            admin_notice_success( $num_courses . ' dummy LearnDash courses generated successfully!');
+        }
+
+        if (isset($_POST['generate_lessons']) && check_admin_referer('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce')) {
+            $course_id_lessons = isset($_POST['course_id_lessons']) ? intval($_POST['course_id_lessons']) : 1;
+            $num_lessons = isset($_POST['num_lessons']) ? intval($_POST['num_lessons']) : 5;
+
+            // Generate specified number of dummy LearnDash lessons for the specified course
+            generate_dummy_learndash_lessons($course_id_lessons, $num_lessons);
+            admin_notice_success( $num_lessons . ' dummy LearnDash lessons generated successfully for Course ID ' . $course_id_lessons);
+        }
+
+        if (isset($_POST['generate_topics']) && check_admin_referer('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce')) {
+            $course_id_topics = isset($_POST['course_id_topics']) ? intval($_POST['course_id_topics']) : 1;
+            $lesson_id_topics = isset($_POST['lesson_id_topics']) ? intval($_POST['lesson_id_topics']) : 1;
+            $num_topics = isset($_POST['num_topics']) ? intval($_POST['num_topics']) : 5;
+
+            // Generate specified number of dummy LearnDash topics for the specified lesson and course
+            generate_dummy_learndash_topics($course_id_topics, $lesson_id_topics, $num_topics);
+            admin_notice_success( $num_topics . ' dummy LearnDash topics generated successfully for Course ID ' . $course_id_topics . ', Lesson ID ' . $lesson_id_topics);
+        }
+
+        if (isset($_POST['generate_quizzes']) && check_admin_referer('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce')) {
+            $course_id_quizzes = isset($_POST['course_id_quizzes']) ? intval($_POST['course_id_quizzes']) : 0;
+            $lesson_id_quizzes = isset($_POST['lesson_id_quizzes']) ? intval($_POST['lesson_id_quizzes']) : 0;
+            $num_quizzes = isset($_POST['num_quizzes']) ? intval($_POST['num_quizzes']) : 5;
+
+            // Generate specified number of dummy LearnDash quizzes with dynamic association
+            generate_dummy_learndash_quizzes($course_id_quizzes, $lesson_id_quizzes, $num_quizzes);
+            admin_notice_success( $num_quizzes . ' dummy LearnDash quizzes generated successfully!');
+        }
+
+        if (isset($_POST['enroll_members']) && check_admin_referer('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce')) {
+            $course_id_enrollment = isset($_POST['course_id_enrollment']) ? intval($_POST['course_id_enrollment']) : 0;
+            $num_members = isset($_POST['num_members']) ? intval($_POST['num_members']) : 5;
+
+            // Enroll specified number of existing users in the specified course
+            enroll_existing_users_in_learndash_course($course_id_enrollment, $num_members);
+            admin_notice_success( $num_members . ' existing users enrolled successfully in Course ID ' . $course_id_enrollment );
         }
 
         if (isset($_POST['make_all_users_active']) && check_admin_referer('bb_massive_dummy_nonce', 'bb_massive_dummy_nonce')) {
@@ -601,4 +720,246 @@ function delete_fake_activities() {
 
     // Delete fake activities from the bp_activity table
     $wpdb->query("DELETE FROM {$wpdb->prefix}bp_activity WHERE action = 'fake_activity'");
+}
+
+// New function to generate dummy LearnDash courses
+// New function to generate dummy LearnDash courses
+function generate_dummy_learndash_courses($num_courses) {
+    for ($i = 1; $i <= $num_courses; $i++) {
+        $course_title = 'LearnDash Course ' . $i;
+        $course_content = 'Description for ' . $course_title;
+        $course_slug = sanitize_title($course_title);
+
+        // Check if the course slug already exists
+        if (course_slug_exists($course_slug)) {
+            // If the slug exists, generate a new one
+            $course_slug = generate_unique_course_slug($course_slug);
+        }
+
+        // Check if the course title already exists
+        if (course_title_exists($course_title)) {
+            // If the title exists, generate a new one
+            $course_title = generate_unique_course_title($course_title);
+            // Update the course description accordingly
+            $course_content = 'Description for ' . $course_title;
+        }
+
+        // Insert dummy LearnDash course
+        $course_id = wp_insert_post(array(
+            'post_title' => $course_title,
+            'post_content' => $course_content,
+            'post_status' => 'publish',
+            'post_author' => get_current_user_id(),
+            'post_type' => 'sfwd-courses',
+            'post_name' => $course_slug,
+        ));
+
+        // Set course progression to Linear
+        update_post_meta($course_id, '_sfwd-courses', array(
+            'sfwd-courses_course_disable_lesson_progression' => '',
+            'sfwd-courses_course_lesson_order_enabled' => '',
+            'sfwd-courses_course_lesson_order' => '',
+            'sfwd-courses_course_lesson_orderby' => '',
+            'sfwd-courses_course_expire_access' => '',
+            'sfwd-courses_course_expire_access_days' => 0,
+            'sfwd-courses_expire_access_delete_progress' => '',
+        ));
+    }
+}
+
+// Function to check if course slug already exists
+function course_slug_exists($slug) {
+    global $wpdb;
+    return $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_type = 'sfwd-courses' AND post_name = %s", $slug));
+}
+
+// Function to generate a unique course slug
+function generate_unique_course_slug($base_slug) {
+    $counter = 1;
+    while (course_slug_exists($base_slug)) {
+        $counter++;
+        $base_slug = preg_replace('/_\d+$/', '', $base_slug); // Remove the previous counter
+        $base_slug .= '_' . $counter;
+    }
+    return $base_slug;
+}
+
+// Function to check if course title already exists
+function course_title_exists($title) {
+    global $wpdb;
+    return $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_type = 'sfwd-courses' AND post_title = %s", $title));
+}
+
+// Function to generate unique course title
+function generate_unique_course_title($base_title) {
+    $counter = 1;
+    while (course_title_exists($base_title)) {
+        $counter++;
+        $base_title = preg_replace('/_\d+$/', '', $base_title); // Remove the previous counter
+        $base_title .= '_' . $counter;
+    }
+    return $base_title;
+}
+
+// New function to generate dummy LearnDash lessons for a specific course
+function generate_dummy_learndash_lessons($course_id, $num_lessons) {
+    for ($i = 1; $i <= $num_lessons; $i++) {
+        $lesson_title = 'Lesson #' . $i;
+
+        // Check if the lesson title already exists
+        if (lesson_title_exists($lesson_title)) {
+            // If the title exists, generate a new one
+            $lesson_title = generate_unique_lesson_title($lesson_title);
+        }
+
+        // Insert dummy LearnDash lesson
+        $lesson_post = array(
+            'post_title' => $lesson_title,
+            'post_content' => '',
+            'post_type' => 'sfwd-lessons',
+            'post_status' => 'publish'
+        );
+
+        $lesson_post_id = wp_insert_post($lesson_post);
+
+        if ($lesson_post_id) {
+            // Assign the lesson to the specified course
+            update_post_meta($lesson_post_id, 'course_id', $course_id);
+        }
+    }
+}
+
+// Function to check if lesson title already exists
+function lesson_title_exists($title) {
+    global $wpdb;
+    return $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_type = 'sfwd-lessons' AND post_title = %s", $title));
+}
+
+// Function to generate unique lesson title
+function generate_unique_lesson_title($base_title) {
+    $counter = 1;
+    while (lesson_title_exists($base_title)) {
+        $counter++;
+        $base_title = preg_replace('/_\d+$/', '', $base_title); // Remove the previous counter
+        $base_title .= '_' . $counter;
+    }
+    return $base_title;
+}
+
+// New function to generate dummy LearnDash topics for a specific lesson and course
+function generate_dummy_learndash_topics($course_id, $lesson_id, $num_topics) {
+    for ($i = 1; $i <= $num_topics; $i++) {
+        $topic_title = 'Topic #' . $i;
+
+        // Check if the topic title already exists
+        if (topic_title_exists($topic_title)) {
+            // If the title exists, generate a new one
+            $topic_title = generate_unique_topic_title($topic_title);
+        }
+
+        // Insert dummy LearnDash topic
+        $topic_post = array(
+            'post_title' => $topic_title,
+            'post_content' => '',
+            'post_type' => 'sfwd-topic',
+            'post_status' => 'publish'
+        );
+
+        $topic_post_id = wp_insert_post($topic_post);
+
+        if ($topic_post_id) {
+            // Assign the topic to the specified course and lesson
+            update_post_meta($topic_post_id, 'course_id', $course_id);
+            update_post_meta($topic_post_id, 'lesson_id', $lesson_id);
+        }
+    }
+}
+
+// Function to check if topic title already exists
+function topic_title_exists($title) {
+    global $wpdb;
+    return $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_type = 'sfwd-topic' AND post_title = %s", $title));
+}
+
+// Function to generate unique topic title
+function generate_unique_topic_title($base_title) {
+    $counter = 1;
+    while (topic_title_exists($base_title)) {
+        $counter++;
+        $base_title = preg_replace('/_\d+$/', '', $base_title); // Remove the previous counter
+        $base_title .= '_' . $counter;
+    }
+    return $base_title;
+}
+
+// New function to generate dummy LearnDash quizzes with dynamic association
+function generate_dummy_learndash_quizzes($course_id, $lesson_id, $num_quizzes) {
+    for ($i = 1; $i <= $num_quizzes; $i++) {
+        $quiz_title = 'Quiz #' . $i;
+
+        // Check if the quiz title already exists
+        if (quiz_title_exists($quiz_title)) {
+            // If the title exists, generate a new one
+            $quiz_title = generate_unique_quiz_title($quiz_title);
+        }
+
+        // Insert dummy LearnDash quiz
+        $quiz_post = array(
+            'post_title' => $quiz_title,
+            'post_content' => '',
+            'post_type' => 'sfwd-quiz',
+            'post_status' => 'publish'
+        );
+
+        $quiz_post_id = wp_insert_post($quiz_post);
+
+        if ($quiz_post_id) {
+            // Dynamically associate the quiz with the specified lesson and/or course
+            if (!empty($course_id)) {
+                update_post_meta($quiz_post_id, 'course_id', $course_id);
+            }
+            if (!empty($lesson_id)) {
+                update_post_meta($quiz_post_id, 'lesson_id', $lesson_id);
+            }
+
+            // Set the quiz to not require passing to avoid "Missing ProQuiz Associated Settings" issue
+            update_post_meta($quiz_post_id, '_sfwd-quiz_require_pass', 'no');
+        }
+    }
+}
+
+// Function to check if quiz title already exists
+function quiz_title_exists($title) {
+    global $wpdb;
+    return $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_type = 'sfwd-quiz' AND post_title = %s", $title));
+}
+
+// Function to generate unique quiz title
+function generate_unique_quiz_title($base_title) {
+    $counter = 1;
+    while (quiz_title_exists($base_title)) {
+        $counter++;
+        $base_title = preg_replace('/_\d+$/', '', $base_title); // Remove the previous counter
+        $base_title .= '_' . $counter;
+    }
+    return $base_title;
+}
+
+// New function to enroll existing users in a specific LearnDash course
+function enroll_existing_users_in_learndash_course($course_id, $num_members) {
+    global $wpdb;
+
+    // Get existing user IDs who are not enrolled in the specified course
+    $user_ids = $wpdb->get_col(
+        $wpdb->prepare(
+            "SELECT ID FROM $wpdb->users WHERE ID NOT IN (SELECT user_id FROM {$wpdb->prefix}learndash_user_activity WHERE course_id = %d) ORDER BY RAND() LIMIT %d",
+            $course_id,
+            $num_members
+        )
+    );
+
+    foreach ($user_ids as $user_id) {
+        // Enroll the user in the course
+        ld_update_course_access($user_id, $course_id, false);
+    }
 }
